@@ -3,6 +3,7 @@
  *                         All rights reserved.
  * Copyright (c) 2015      Research Organization for Information Science
  *                         and Technology (RIST). All rights reserved.
+ * Copyright (c) 2015	   Intel, Inc. All rights reserved 
  *
  * Copyright (c) 2015 Cisco Systems, Inc.  All rights reserved.
  * $COPYRIGHT$
@@ -302,6 +303,18 @@ static int _shmem_init(int argc, char **argv, int requested, int *provided)
     if (OSHMEM_SUCCESS != ret) {
         error = "SPML control failed";
         goto error;
+    }
+
+    {
+        ompi_proc_t** procs = NULL;
+        size_t nprocs = 0;
+        procs = ompi_proc_world(&nprocs);
+        while (nprocs--) {
+        /*need MTL for spml-ofi */
+            oshmem_group_all->proc_array[nprocs]->proc_endpoints[OMPI_PROC_ENDPOINT_TAG_MTL] =
+                    procs[nprocs]->proc_endpoints[OMPI_PROC_ENDPOINT_TAG_MTL];
+        }
+        free(procs);
     }
 
     ret =

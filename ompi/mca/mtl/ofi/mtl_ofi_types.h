@@ -16,6 +16,9 @@
 
 BEGIN_C_DECLS
 
+#define S1(X) #X
+#define S(X) S1(X)
+
 /**
  * MTL Module Interface
  */
@@ -45,6 +48,10 @@ typedef struct mca_mtl_ofi_module_t {
 
     /** Optional user-specified OFI provider name */
     char *provider_name;
+
+    /*may need to share with spml */
+    struct fi_info *p_info;
+    struct fid_stx *stx;
 
     /** Maximum inject size */
     size_t max_inject_size;

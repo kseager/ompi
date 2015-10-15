@@ -3,6 +3,8 @@
  *                         All rights reserved.
  * Copyright (c) 2015      Research Organization for Information Science
  *                         and Technology (RIST). All rights reserved.
+ * Copyright (c) 2015      Intel, Inc.
+ *                         All rights reserved.
  *
  * $COPYRIGHT$
  *
@@ -102,9 +104,10 @@ static int mca_memheap_base_close(void)
         return OSHMEM_SUCCESS;
     }
 
-    memheap_oob_destruct();
-
-    mca_memheap_base_dereg(&mca_memheap_base_map);
+    if(!getenv("OSHMEM_ENV_NON_SEGMENTED")) {
+	memheap_oob_destruct();
+	mca_memheap_base_dereg(&mca_memheap_base_map);
+    }
 
     mca_memheap_base_alloc_exit(&mca_memheap_base_map);
     mca_memheap_base_static_exit(&mca_memheap_base_map);

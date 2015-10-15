@@ -208,6 +208,7 @@ ompi_mtl_ofi_component_init(bool enable_progress_threads,
                             bool enable_mpi_threads)
 {
     int ret, fi_version;
+    short spml_ofshm_enabled = 0;
     struct fi_info *hints;
     struct fi_info *providers = NULL, *prov = NULL;
     struct fi_cq_attr cq_attr = {0};
@@ -225,6 +226,11 @@ ompi_mtl_ofi_component_init(bool enable_progress_threads,
      *           Tag matching is specified to implement MPI semantics.
      * msg_order: Guarantee that messages with same tag are ordered.
      */
+    
+     if(!strcmp(S(MCA_oshmem_spml_DIRECT_CALL_COMPONENT), "ofshm")) {
+	spml_ofshm_enabled = 1;
+     }
+
     hints = fi_allocinfo();
     if (!hints) {
         opal_output_verbose(1, ompi_mtl_base_framework.framework_output,
@@ -234,7 +240,13 @@ ompi_mtl_ofi_component_init(bool enable_progress_threads,
     }
     hints->mode               = FI_CONTEXT;
     hints->ep_attr->type      = FI_EP_RDM;      /* Reliable datagram         */
-    hints->caps               = FI_TAGGED;      /* Tag matching interface    */
+
+    if(spml_ofshm_enabled) {
+	hints->caps             = FI_TAGGED | FI_RMA | FI_ATOMICS;
+    } else {
+	hints->caps                = FI_TAGGED;
+    }
+    
     hints->tx_attr->msg_order = FI_ORDER_SAS;
     hints->rx_attr->msg_order = FI_ORDER_SAS;
 
@@ -282,6 +294,8 @@ ompi_mtl_ofi_component_init(bool enable_progress_threads,
         goto error;
     }
 
+    if(spml_ofshm_enabled)
+	ompi_mtl_ofi.p_info = providers;
 
     /**
      * Open fabric
@@ -315,6 +329,16 @@ ompi_mtl_ofi_component_init(bool enable_progress_threads,
         goto error;
     }
 
+    if(spml_ofshm_enabled) {
+	ret = fi_stx_context(ompi_mtl_ofi.domain, NULL, &ompi_mtl_ofi.stx, NULL);
+	if (0 != ret) {
+        	opal_output_verbose(1, ompi_mtl_base_framework.framework_output,
+                	"%s:%d: fi_domain failed: %s\n",
+                         __FILE__, __LINE__, fi_strerror(-ret));
+		goto error;
+	}
+   }
+
     /**
      * Create a transport level communication endpoint.  To use the endpoint,
      * it must be bound to completion counters or event queues and enabled,
@@ -322,6 +346,9 @@ ompi_mtl_ofi_component_init(bool enable_progress_threads,
      * completion queues, etc.
      * see man fi_endpoint for more details.
      */
+     if(spml_ofshm_enabled)
+	prov->caps             = FI_TAGGED;
+
     ret = fi_endpoint(ompi_mtl_ofi.domain, /* In:  Domain object   */
                       prov,                /* In:  Provider        */
                       &ompi_mtl_ofi.ep,    /* Out: Endpoint object */
@@ -390,6 +417,16 @@ ompi_mtl_ofi_component_init(bool enable_progress_threads,
         goto error;
     }
 
+    if(spml_ofshm_enabled) {
+	ret = fi_ep_bind(ompi_mtl_ofi.ep, (fid_t)ompi_mtl_ofi.stx, 0);
+	if (0 != ret) {
+		opal_output_verbose(1, ompi_mtl_base_framework.framework_output,
+			"%s:%d: fi_bind STX-EP failed: %s\n",
+			__FILE__, __LINE__, fi_strerror(-ret));
+		goto error;
+	}
+    }
+
     /**
      * Enable the endpoint for communication
      * This commits the bind operations.
@@ -407,8 +444,11 @@ ompi_mtl_ofi_component_init(bool enable_progress_threads,
      */
     fi_freeinfo(hints);
     hints = NULL;
-    fi_freeinfo(providers);
-    providers = NULL;
+
+    if(!spml_ofshm_enabled) {
+	fi_freeinfo(providers);
+	providers = NULL;
+    }
 
     /**
      * Get our address and publish it with modex.

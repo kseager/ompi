@@ -3,6 +3,8 @@
  *                         All rights reserved.
  * Copyright (c) 2015      Research Organization for Information Science
  *                         and Technology (RIST). All rights reserved.
+ * Copyright (c) 2015      Intel, Inc.
+ *                         All rights reserved.
  * $COPYRIGHT$
  *
  * Additional copyrights may follow
@@ -244,6 +246,7 @@ static memheap_context_t* _memheap_create(void)
     int rc = OSHMEM_SUCCESS;
     static memheap_context_t context;
     size_t user_size;
+    bool non_segmented = false;
 
     user_size = _memheap_size();
     if (user_size < MEMHEAP_BASE_MIN_SIZE) {
@@ -251,7 +254,15 @@ static memheap_context_t* _memheap_create(void)
                       (unsigned long long)user_size, MEMHEAP_BASE_MIN_SIZE);
         return NULL ;
     }
-    /* Inititialize symmetric area */
+
+    /*for ease of use default will be segmented */
+    if(getenv("OSHMEM_ENV_NON_SEGMENTED")) {
+	non_segmented = true;
+    }
+
+    context.non_segmented = non_segmented;
+
+    /* Inititialize symmetric area: sshmem create */
     if (OSHMEM_SUCCESS == rc) {
         rc = mca_memheap_base_alloc_init(&mca_memheap_base_map,
                                          user_size + MEMHEAP_BASE_PRIVATE_SIZE);
@@ -262,14 +273,14 @@ static memheap_context_t* _memheap_create(void)
         rc = mca_memheap_base_static_init(&mca_memheap_base_map);
     }
 
-    /* Memory Registration */
-    if (OSHMEM_SUCCESS == rc) {
-        rc = mca_memheap_base_reg(&mca_memheap_base_map);
-    }
+    if(!non_segmented) {
+	if (OSHMEM_SUCCESS == rc) {
+		rc = mca_memheap_base_reg(&mca_memheap_base_map);
+	}
 
-    /* Init OOB channel */
-    if (OSHMEM_SUCCESS == rc) {
-        rc = memheap_oob_init(&mca_memheap_base_map);
+	if (OSHMEM_SUCCESS == rc) {
+		rc = memheap_oob_init(&mca_memheap_base_map);
+	}
     }
 
     if (OSHMEM_SUCCESS == rc) {

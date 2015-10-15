@@ -1,6 +1,8 @@
 /**
  * Copyright (c) 2013      Mellanox Technologies, Inc.
  *                         All rights reserved.
+ * Copyright (c) 2015      Intel, Inc.
+ *                         All rights reserved.
  * $COPYRIGHT$
  *
  * Additional copyrights may follow
@@ -53,6 +55,8 @@ struct mca_memheap_ptmalloc_module_t {
     opal_mutex_t lock; /** Part of the allocator */
 };
 
+extern sshmem_mkey_t * dummy;
+
 typedef struct mca_memheap_ptmalloc_module_t mca_memheap_ptmalloc_module_t;
 OSHMEM_DECLSPEC extern mca_memheap_ptmalloc_module_t memheap_ptmalloc;
 
@@ -67,6 +71,18 @@ OSHMEM_DECLSPEC extern int mca_memheap_ptmalloc_align(size_t, size_t, void**);
 OSHMEM_DECLSPEC extern int mca_memheap_ptmalloc_free(void*);
 OSHMEM_DECLSPEC extern int mca_memheap_ptmalloc_finalize(void);
 
+OSHMEM_DECLSPEC extern sshmem_mkey_t * mca_memheap_ptmalloc_get_cached_mkey(
+								 int pe,
+								 void *va,
+								 int btl_id,
+								 void **rva);
+OSHMEM_DECLSPEC extern sshmem_mkey_t * mca_memheap_ptmalloc_get_mkey(void* va, int tr_id);
+OSHMEM_DECLSPEC extern uint64_t mca_memheap_ptmalloc_find_offset(int pe,
+								  int tr_id,
+								  void* va,
+								  void* rva);
+OSHMEM_DECLSPEC extern int mca_memheap_ptmalloc_is_symmetric_addr(const void* va);
+OSHMEM_DECLSPEC extern void mca_memheap_ptmalloc_modex_recv_all(void);
 END_C_DECLS
 
 #endif /* MCA_MEMHEAP_BUDDY_H */

@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2013      Mellanox Technologies, Inc.
  *                         All rights reserved.
+ * Copyright (c) 2015	   Intel, Inc. All rights reserved 
  * $COPYRIGHT$
  *
  * Additional copyrights may follow
@@ -37,9 +38,8 @@
         RUNTIME_CHECK_ADDR(target);                                 \
                                                                     \
         size = sizeof(out_value);                                   \
-        rc = MCA_ATOMIC_CALL(fadd(                                  \
+        rc = MCA_ATOMIC_CALL(atomicto(                              \
             (void*)target,                                          \
-            NULL,                                                   \
             (const void*)&value,                                    \
             size,                                                   \
             pe,                                                     \

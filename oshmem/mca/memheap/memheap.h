@@ -4,6 +4,8 @@
  *                         All rights reserved.
  * Copyright (c) 2015      Los Alamos National Security, LLC. All rights
  *                         reserved.
+ * Copyright (c) 2015      Intel, Inc.
+ *                         All rights reserved.
  * $COPYRIGHT$
  *
  * Additional copyrights may follow
@@ -20,8 +22,11 @@
 #include "oshmem/mca/sshmem/sshmem.h"
 #include "oshmem/mca/spml/spml.h"
 
+#include "stdbool.h"
+
 #define DEFAULT_SYMMETRIC_HEAP_SIZE      256
 #define SIZE_IN_MEGA_BYTES(size_in_mb)  size_in_mb * 1024 * 1024
+
 
 BEGIN_C_DECLS
 struct mca_memheap_base_module_t;
@@ -32,6 +37,7 @@ typedef struct memheap_context
     void*   private_base_addr;
     size_t  user_size;
     size_t  private_size;
+    bool    non_segmented;
 } memheap_context_t;
 
 /**

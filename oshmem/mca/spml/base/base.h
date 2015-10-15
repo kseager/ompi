@@ -2,6 +2,7 @@
  * Copyright (c) 2013      Mellanox Technologies, Inc.
  *                         All rights reserved.
  * Copyright (c) 2015 Cisco Systems, Inc.  All rights reserved.
+ * Copyright (c) 2015	   Intel, Inc. All rights reserved 
  * $COPYRIGHT$
  *
  * Additional copyrights may follow
@@ -21,6 +22,27 @@
 
 #include "oshmem/mca/spml/spml.h"
 
+#define SPML_BASE_DO_CMP(res, addr, op, val) \
+    switch((op)) { \
+        case SHMEM_CMP_EQ: \
+            res = *(addr) == (val) ? 1 : 0; \
+            break; \
+        case SHMEM_CMP_NE: \
+            res = *(addr) != (val) ? 1 : 0; \
+            break; \
+        case SHMEM_CMP_GT: \
+            res =  *(addr) > (val) ? 1 : 0; \
+            break; \
+        case SHMEM_CMP_LE: \
+            res = *(addr) <= (val) ? 1 : 0; \
+            break; \
+        case SHMEM_CMP_LT: \
+            res = *(addr) < (val) ? 1: 0; \
+            break; \
+        case SHMEM_CMP_GE: \
+            res = *(addr) >= (val) ? 1 : 0; \
+            break; \
+    }
 /*
  * Global functions for the PML
  */

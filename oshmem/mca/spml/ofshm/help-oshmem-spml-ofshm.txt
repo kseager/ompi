@@ -1,0 +1,44 @@
+#
+# Copyright (c) 2015	   Intel, Inc. All rights reserved 
+# $COPYRIGHT$
+#
+# Additional copyrights may follow
+#
+# $HEADER$
+#
+[unable to create endpoint]
+OFI was unable to create an endpoint. Please make sure that the network link is
+active on the node and the hardware is functioning.
+
+  Error: %s
+#
+[unable to get endpoint address]
+OFI was unable to get endpoint address
+
+  Error: %s
+#
+[ofi mq create]
+Failed to create MQ for endpoint
+
+  Error: %s
+#
+[errors during ofi_progress]
+Error %s occurred in attempting to make network progress (ofi_progress).
+#
+[ofi init]
+Initialization of OFI library failed.
+
+  Error: %s
+#
+[ofi shm tls]
+ERROR: OFI shared memory transport can not be used
+because it is not fully compliant with OSHMEM spec
+
+OFI transport setting: %s
+#
+[ofi tls]
+ERROR: valid ofi transports are:
+"ud" "ud,self" "rc" or "dc"
+
+transport setting is: %s=%s
+#

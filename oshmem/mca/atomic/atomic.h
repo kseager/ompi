@@ -4,6 +4,8 @@
  *                         All rights reserved.
  * Copyright (c) 2015      Los Alamos National Security, LLC. All rights
  *                         reserved.
+ * Copyright (c) 2015	   Intel, Inc. All rights reserved 
+ *
  * $COPYRIGHT$
  *
  * Additional copyrights may follow
@@ -95,6 +97,16 @@ struct mca_atomic_base_module_1_0_0_t {
     int (*atomic_cswap)(void *target,
                         void *prev,
                         const void *cond,
+                        const void *value,
+                        size_t nlong,
+                        int pe);
+    int (*atomic_atomicto)(void *target,
+                       const void *value,
+                       size_t nlong,
+                       int pe,
+                       struct oshmem_op_t *op);
+    int (*atomic_swap)(void *target,
+                        void *prev,
                         const void *value,
                         size_t nlong,
                         int pe);
